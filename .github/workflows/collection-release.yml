@@ -13,19 +13,15 @@ jobs:
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
-      - name: Notify Slack of starting
-        uses: act10ns/slack@v1
-        with:
-          status: starting
-          channel: '#collection_release'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
       - uses: actions/checkout@v2
 
-      - name: Random task
-        run: echo 'test'
-        id: test
+      # - name: Random task
+      #   run: pip3 uninstall ansible
+      # - name: Random task
+      #   run: pip3 install ansible-base
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
 
       # - uses: actions/checkout@v2
 
@@ -77,20 +73,20 @@ jobs:
       #     asset_name: manala-roles-${{ steps.changelog.outputs.version }}.tar.gz
       #     asset_content_type: application/zip
 
-      - uses: act10ns/slack@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./manala-roles-${{ steps.changelog.outputs.version }}.tar.gz
-          asset_name: manala-roles-${{ steps.changelog.outputs.version }}.tar.gz
-          asset_content_type: application/zip
+      # - uses: act10ns/slack@v1
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ./manala-roles-${{ steps.changelog.outputs.version }}.tar.gz
+      #     asset_name: manala-roles-${{ steps.changelog.outputs.version }}.tar.gz
+      #     asset_content_type: application/zip
 
-      - name: Notify Slack of action status
-        uses: act10ns/slack@v1
-        with:
-          status: ${{ job.status }}
-          steps: ${{ toJson(steps) }}
-          channel: '#collection_release'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: always()
+      # - name: Notify Slack of action status
+      #   uses: act10ns/slack@v1
+      #   with:
+      #     status: ${{ job.status }}
+      #     steps: ${{ toJson(steps) }}
+      #     channel: '#collection_release'
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #   if: always()
 

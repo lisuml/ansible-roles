@@ -5,6 +5,13 @@ import shutil
 import pathlib
 import re
 import logging
+import json
+import ansible
+
+from ansible.galaxy.collection import _build_files_manifest
+from ansible.galaxy.collection import _build_manifest
+from ansible.galaxy.collection import _get_galaxy_yml
+from ansible.module_utils._text import to_bytes
 
 logging.basicConfig(level=logging.INFO)
 
@@ -35,6 +42,18 @@ logging.info('Copy README file into "%s"', collection_dir)
 shutil.copyfile(
 	'README_COLLECTION.md',
 	os.path.join(collection_dir, 'README.md')
+)
+
+logging.info('Copy MANIFEST.json file into "%s"', collection_dir)
+shutil.copyfile(
+	'MANIFEST.json',
+	os.path.join(collection_dir, 'MANIFEST.json')
+)
+
+logging.info('Copy FILES.json file into "%s"', collection_dir)
+shutil.copyfile(
+	'FILES.json',
+	os.path.join(collection_dir, 'FILES.json')
 )
 
 for plugins_dir in ['lookup', 'callback', 'filter', 'modules', 'action']:
@@ -136,3 +155,33 @@ for role_path in pathlib.Path('roles').glob('*'):
 				file.seek(0)
 				file.write(re.sub(regex, "\\1manala.roles.\\2", file_data, 0, re.MULTILINE))
 				file.truncate()
+
+##############################
+# MANIFEST.json & FILES.json #
+##############################
+
+galaxy = _get_galaxy_yml('galaxy.yml')
+b_here = to_bytes(os.path.abspath(collection_dir))
+
+logging.info('Generate MANIFEST.json file into "%s"', collection_dir)
+with open('collection/MANIFEST.json', 'w+') as f:
+    json.dump(
+        _build_manifest(**galaxy),
+        f,
+        indent=4,
+        sort_keys=True,
+    )
+
+logging.info('Generate FILES.json file into "%s"', collection_dir)
+with open('collection/FILES.json', 'w+') as f:
+    json.dump(
+        _build_files_manifest(
+            b_here,
+            galaxy['namespace'],
+            galaxy['name'],
+            galaxy['build_ignore'],
+        ),
+        f,
+        indent=4,
+        sort_keys=True,
+    )
